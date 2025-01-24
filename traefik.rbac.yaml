@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: traefik
+  namespace: kube-public
+rules:
+  - apiGroups: [""]
+    resources: ["services", "endpoints", "pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: traefik
+  namespace: kube-public
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: kube-public
+roleRef:
+  kind: Role
+  name: traefik
+  apiGroup: rbac.authorization.k8s.io

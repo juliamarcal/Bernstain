@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: kube-public
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      containers:
+        - name: traefik
+          image: traefik:3.1
+          ports:
+            - containerPort: 80
+            - containerPort: 8080
+          args:
+            - "--api.insecure=true"
+            - "--providers.kubernetesingress=true"
+            - "--entrypoints.web.address=:80"
+          volumeMounts:
+            - name: traefik-cert
+              mountPath: /certs
+          resources:
+            limits:
+              memory: "128M"
+            requests:
+              memory: "64M"
+      volumes:
+        - name: traefik-cert
+          emptyDir: {}
+      restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - traefik
+            topologyKey: "kubernetes.io/hostname"

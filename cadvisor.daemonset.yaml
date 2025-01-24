@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cadvisor
+  namespace: kube-system
+  labels:
+    app: cadvisor
+spec:
+  selector:
+    matchLabels:
+      app: cadvisor
+  template:
+    metadata:
+      labels:
+        app: cadvisor
+    spec:
+      containers:
+      - name: cadvisor
+        image: gcr.io/cadvisor/cadvisor:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: "100m"
+            memory: "200M"
+          requests:
+            cpu: "50m"
+            memory: "100M"
+        volumeMounts:
+        - name: disk
+          mountPath: /dev/disk
+          readOnly: true
+        - name: sys
+          mountPath: /sys
+          readOnly: true
+        - name: rootfs
+          mountPath: /rootfs
+          readOnly: true
+        - name: var-run
+          mountPath: /var/run
+          readOnly: true
+        - name: docker
+          mountPath: /var/lib/docker
+          readOnly: true
+      restartPolicy: Always
+      volumes:
+      - name: disk
+        hostPath:
+          path: /dev/disk
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: rootfs
+        hostPath:
+          path: /
+      - name: var-run
+        hostPath:
+          path: /var/run
+      - name: docker
+        hostPath:
+          path: /var/lib/docker
